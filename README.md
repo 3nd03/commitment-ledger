@@ -23,10 +23,10 @@ Every status is backed by the original commitment quote, source link, what was s
 
 ## Pipeline
 
-1. **Ingest** (`src/ingest.py`) — pull debates/written answers, store raw in SQLite
-2. **Extract** (`src/extract.py`) — LLM structured extraction of commitments from raw text
-3. **Match** (`src/match.py`) — embed + retrieve + LLM judge for follow-up evidence
-4. **Dashboard** (`src/dashboard/app.py`) — Plotly Dash, department/topic view by default
+1. **Ingest** (`src/ingest.py`): pulls debates and written answers, stores raw text in SQLite
+2. **Extract** (`src/extract.py`): LLM pulls structured commitments out of the raw text
+3. **Match** (`src/match.py`): embeds commitments and candidate passages, retrieves, LLM judges whether it's follow-up evidence
+4. **Dashboard** (`src/dashboard/app.py`): Plotly Dash, shows department/topic view by default
 
 ## Setup
 
@@ -39,7 +39,7 @@ cp .env.example .env  # fill in API keys
 
 ## Environment variables
 
-See `.env.example`. You need an LLM API key (Claude or OpenAI) and an embeddings API key. Parliamentary APIs (Hansard, Written Questions) don't require a key but confirm rate limits before the build week, see `docs/OPEN_QUESTIONS.md`.
+See `.env.example`. You need an LLM API key (Claude or OpenAI) and an embeddings API key. The parliamentary APIs (Hansard, Written Questions) don't need a key, but check the rate limits before the build week starts, see `docs/OPEN_QUESTIONS.md`.
 
 ## Running
 
@@ -56,4 +56,4 @@ See `docs/BUILD_PLAN.md`.
 
 ## AI use disclosure
 
-Per team policy: AI used for scaffolding, error checking, and review during build. All logic, scoping and framing decisions are the team's own. No AI attribution in commits or README.
+AI was used for scaffolding, error checking, and review during the build. Logic, scoping, and framing decisions are the team's own. No AI attribution in commits or this README.
