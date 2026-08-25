@@ -1,0 +1,10 @@
+requests>=2.31
+pandas>=2.2
+pydantic>=2.7
+numpy>=1.26
+python-dotenv>=1.0
+dash>=2.17
+plotly>=5.22
+anthropic>=0.34
+openai>=1.40
+tqdm>=4.66
