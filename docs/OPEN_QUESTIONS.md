@@ -22,3 +22,6 @@ Date range could be last 10 years to see before & after for NHS. This needs to b
 
 **Q3:**
 Each person uses their own API keys for Hansard and Written Questions and Answers. Shouldn't affect the codes. 
+
+**Q9:**
+Email sent for clarification; response will be added soon!
