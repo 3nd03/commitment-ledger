@@ -43,4 +43,6 @@ Email sent for clarification; response will be added soon!
 - [ ] [x] **LLM provider keys**: each team member uses their own individual API keys for Claude and OpenAI (Claude for extraction/judging, OpenAI for embeddings, per the existing src/config.py setup). Decided.
 - [ ] [x] **RAG experience**: no one on the team has built embedding + retrieval before. This is new ground for everyone. Implication: budget more time for Stage 3 than the original plan assumed, and consider a simpler v1 (embedding similarity threshold only, no second-pass LLM judge) with the LLM judge added only if time allows, see updated note in BUILD_PLAN.md.
 - [ ] **Judging criteria**: ask EasyA directly if not already published. Not yet done.
+
+
 Update this file as answers come in, don't let them live only in Slack/WhatsApp.
