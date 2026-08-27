@@ -9,7 +9,7 @@ Team of 5, all technical. Hackathon day Friday 4 September. See Timeline below f
 | Ingestion | `src/ingest.py`, API integration, SQLite schema | 1-2 |
 | Extraction | `src/extract.py`, prompt design, Pydantic schema | 1 |
 | Matching | `src/match.py`, embeddings, retrieval, LLM judge | Abdur & Oscar |
-| Dashboard | `src/dashboard/app.py`, Plotly Dash | 1, can start early on mock data |
+| Dashboard | `src/dashboard/app.py`, Plotly Dash | Kabir, can start early on mock data (can be done at the start of project) --> Dashboard Design|
 
 Fill in names in this table once assigned.
 
