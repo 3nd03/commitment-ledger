@@ -13,6 +13,7 @@ These block or shape the build. Don't start Stage 3 work until the starred ones 
 - [ ] **Judging criteria**: ask EasyA directly if not already published.
 
 Update this file as answers come in, don't let them live only in Slack/WhatsApp.
+--------------ANSWERS-------------------------------------------
 
 **Kabir's Answers**
 
