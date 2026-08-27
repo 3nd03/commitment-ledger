@@ -20,7 +20,7 @@ Team is thinking that NHS might be the best policy area of choice since there ar
 **Q2:**
 Date range could be last 10 years to see before & after for NHS. This needs to be explored further. 
 
-**Q3:**
+**Q3 & Q4:**
 Each person uses their own API keys for Hansard and Written Questions and Answers. Shouldn't affect the codes. 
 
 **Q9:**
