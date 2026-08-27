@@ -11,8 +11,6 @@ Team of 5, all technical. Hackathon day Friday 4 September. See Timeline below f
 | Matching | `src/match.py`, embeddings, retrieval, LLM judge | Abdur & Oscar |
 | Dashboard | `src/dashboard/app.py`, Plotly Dash | Kabir, can start early on mock data (can be done at the start of project) --> Dashboard Design|
 
-Fill in names in this table once assigned.
-
 ## Work outside the four coding roles
 
 These don't disappear just because they're not code. Someone has to own each one.
