@@ -18,7 +18,7 @@ Update this file as answers come in, don't let them live only in Slack/WhatsApp.
 Team is thinking that NHS might be the best policy area of choice since there are more docs and rich in data as well as greater access to Hansard and Written and Answer Questions APIs.
 
 **Q2:**
-Date range could be last 10 years to see before & after for NHS. This needs to be explored further. 
+Date range could be last 10 years to see before & after for NHS. This needs to be explored further. change date range from 10 years to Current parliamentary session only
 
 **Q3 & Q4:**
 Each person uses their own API keys for Hansard and Written Questions and Answers. Shouldn't affect the codes. 
