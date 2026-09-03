@@ -1,47 +1,43 @@
 # Pitch script — draft
 
-First pass. Edit to your own voice and time it — this reads at roughly 4-5 minutes for the talk + demo, adjust to whatever slot EasyA actually gives you.
+Two different formats, per the actual schedule:
+- **12:15-13:15 — table round.** Judges circulate, you demo live and talk one-on-one. No hard clock, but each judge only stops briefly, so lead with a tight hook and let *them* drive with questions.
+- **13:15-14:00 — stage, finalists only, strict 2:00 per team.** This is a monologue with a hard cap. Assume the 2:00 includes any screen-switch lag — the script below runs ~80-90s spoken, leaving real buffer.
+
+Edit both to your voice and rehearse against a timer — 2:00 on stage is unforgiving.
 
 ---
 
-## 1. Hook (~30s)
+## Table round (12:15-13:15) — opener + talking points
 
-Parliament makes thousands of commitments every session — ministers promising to publish a review, fund a programme, hit a target. Right now, checking whether any specific one was kept means manually cross-referencing Hansard and written answers by hand. Nobody does this systematically. Not journalists, not opposition researchers, not the public. The volume makes it practically impossible.
+**Opener (~30-40s, then stop and let them respond):**
 
-## 2. What we built (~30s)
+> Hey — this is Commitment Ledger. Parliament makes thousands of policy commitments a session and nobody systematically checks if they were kept. We built a pipeline that pulls real Hansard and Written Answers, has an LLM extract genuine commitments, then verifies each one against later government records — fulfilled, in progress, or no evidence found, honestly, no padded numbers. Every verdict has a source link and a full search trail so you can audit it yourself. Want me to show you one?
 
-Commitment Ledger. It ingests real Hansard debates and Written Answers, uses an LLM to extract genuine policy commitments — not vague boilerplate — then embeds and retrieves candidate follow-up evidence, and uses a second LLM pass to judge whether that evidence shows the commitment was fulfilled, in progress, or not yet evidenced.
+Then follow their lead. Have these ready to pull up on demand:
 
-## 3. The differentiator: honesty by design (~45s)
+- **The hero example**: *"Recruiting an additional 8,500 mental health workers this Parliament, three years ahead of schedule"* → fulfilled, near-verbatim government confirmation, source link right there.
+- **A `no_evidence_found` search trail**: click a row, show the candidate documents considered and rejected — proves it's not a black box.
+- **The bug-catching story**, if they ask "what was hard" or "how do you know it's accurate": the government's own Written Answers API was silently truncating 97% of official answers to 258 characters — caught it, fixed it, manually re-verified every fulfilled result by hand afterward.
+- **Scope honesty**, if asked why numbers look small: single policy area (NHS), current session only, most commitments are simply too recent to have resolved yet.
 
-Most AI tools optimize to look impressive. We optimized to be checkable. Three states only — no fabricated confidence scores. And "no evidence found" is deliberately framed as a statement about *our search*, not an accusation against the minister — we might just not have found it yet.
+## Stage pitch (13:15-14:00) — strict 2:00
 
-Every single verdict ships with a source link, the actual evidence quote, and a full search trail: which documents we checked, how similar each one was, and why we did or didn't count it as evidence. You can audit every claim this tool makes.
+Read-through target: ~85-95 seconds of speech, leaving buffer for the screen switch to the live dashboard.
 
-## 4. Live demo (~90s)
+> Parliament makes thousands of policy commitments a session. No one checks if they were kept — the volume makes it impossible by hand.
+>
+> We built Commitment Ledger. It ingests real Hansard and Written Answers, has an LLM extract genuine commitments, then verifies whether later government records show each one was fulfilled, in progress, or not yet evidenced.
+>
+> Here's the differentiator: we didn't optimize this to look impressive. We optimized it to be checkable. No fabricated confidence scores — three honest states, and every single verdict ships with a source link and the actual evidence quote.
+>
+> *[switch to dashboard]* Take this one: "Recruiting 8,500 mental health workers, three years ahead of schedule." Fulfilled — verbatim government confirmation, right here.
+>
+> And we don't just trust our own pipeline. While building this, we found the government's own API was silently truncating 97% of official answers — we were judging evidence on a preview, not the real record. We caught it, fixed it, and manually re-verified every fulfilled result by hand.
+>
+> This is what government accountability tooling looks like when it refuses to lie to you.
 
-*(runs against a pre-computed dataset — no live API calls on stage)*
-
-- Load the dashboard. Point at the top callout: 386 documents in, 483 commitments extracted, honest split of outcomes.
-- **Hero example** — click into: *"Recruiting an additional 8,500 mental health workers this Parliament, three years ahead of schedule."* Marked fulfilled. Show the evidence quote — near-verbatim government confirmation — and the source link.
-- Click a `no_evidence_found` row. Open the search trail. Show the candidates that *were* checked and why none counted as evidence — this is the receipts, not a black box.
-- Scroll the charts: commitments over time, most-tagged topics, department breakdown (log scale, since one department dominates a single-policy-area pilot).
-
-## 5. Credibility beat: we caught our own bugs (~30-45s)
-
-While building this, we found that the government's own Written Answers API was silently truncating 97% of official answers to 258 characters — we were judging evidence on a preview, not the real record. We also found a JSON-parsing bug that was discarding every genuine "fulfilled" verdict as "unrelated." We fixed both, then personally re-verified every single fulfilled result by hand — and downgraded ones that didn't hold up, even after the fixes. That's not a caveat. That's the point: a tool that checks itself is worth more than one that doesn't.
-
-## 6. Honest limitations (~20-30s)
-
-Scoped to one policy area — NHS — and the current parliamentary session. This demo runs against a frozen, pre-computed dataset; no live calls during the pitch. Our retrieval isn't perfect — we manually found cases where real evidence existed but our system's search missed it, and in every one of those cases we chose to report "no evidence found" rather than guess.
-
-## 7. Responsible AI (~15-20s)
-
-Public data only. No personal profiling. Evidence-first, not confidence-fabricating. Human-in-the-loop validation throughout the build, not just at the end.
-
-## 8. Close (~15s)
-
-This is what government-accountability tooling looks like when it refuses to lie to you.
+**If there's time left after rehearsing** (there probably won't be, but in order of priority to add back in): one line on scope (NHS, current session only), then responsible-AI framing (public data only, no profiling, evidence-first).
 
 ---
 
