@@ -134,6 +134,20 @@ def fetch_hansard_debates(policy_area: str, start: str, end: str) -> list[dict]:
     return docs
 
 
+def _fetch_full_answer_text(question_id: int, fallback: str) -> str:
+    # the list endpoint's answerText is hard-capped at 258 chars (confirmed live
+    # 2026-09-03, ends in a literal "..." on ~97% of results) -- the single-question
+    # detail endpoint returns the real, untruncated, HTML-wrapped answer.
+    try:
+        resp = requests.get(f"{WRITTEN_ANSWERS_BASE}/api/writtenquestions/questions/{question_id}", timeout=15)
+        resp.raise_for_status()
+        val = resp.json().get("value", {})
+        full = val.get("answerText")
+        return _strip_tags(full) if full else fallback
+    except requests.RequestException:
+        return fallback  # keep the truncated preview rather than drop the document
+
+
 def _fetch_written_answers_window(policy_area: str, start: str, end: str, cap: int) -> list[dict]:
     docs = []
     skip = 0
@@ -163,6 +177,7 @@ def _fetch_written_answers_window(policy_area: str, start: str, end: str, cap: i
                 continue  # not yet answered, nothing to extract/match against
             date_tabled = (v.get("dateTabled") or "")[:10]
             answering = v.get("answeringMember") or {}
+            answer_text = _fetch_full_answer_text(v["id"], v.get("answerText", ""))
             docs.append({
                 "id": f"wq-{v['id']}",
                 "date": (v.get("dateAnswered") or v.get("dateTabled") or "")[:10],
@@ -170,7 +185,7 @@ def _fetch_written_answers_window(policy_area: str, start: str, end: str, cap: i
                 "department": v.get("answeringBodyName"),
                 "title": v.get("heading"),
                 "url": f"https://questions-statements.parliament.uk/written-questions/detail/{date_tabled}/{v['uin']}",
-                "text": f"Q: {v.get('questionText', '')}\n\nA: {v.get('answerText', '')}",
+                "text": f"Q: {v.get('questionText', '')}\n\nA: {answer_text}",
             })
             if len(docs) >= cap:
                 break
