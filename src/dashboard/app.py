@@ -57,7 +57,7 @@ def load_data(db_path: str = DB_PATH) -> pd.DataFrame:
     df["status"] = df["status"].fillna("no_evidence_found")
     df["department"] = df["department"].fillna("(unspecified)")
     df["source_link"] = "[Source](" + df["source_url"] + ")"
-    df["evidence_link"] = df["evidence_url"].apply(lambda u: f"[Evidence]({u})" if pd.notna(u) else "—")
+    df["evidence_link"] = df["evidence_url"].apply(lambda u: f"[Evidence]({u})" if pd.notna(u) else "-")
     df["month"] = df["date"].str.slice(0, 7)
     return df, doc_counts
 
@@ -89,8 +89,14 @@ total_docs = hansard_n + written_n
 total_commitments = len(df)
 matched_n = status_counts.get("fulfilled", 0) + status_counts.get("in_progress", 0)
 
+# departments with a single commitment clutter the chart -- fold them into "Other"
+# (the dropdown/table below keep the real department name, this only affects the chart)
+dept_totals = df["department"].value_counts()
+single_depts = set(dept_totals[dept_totals == 1].index)
+_chart_department = df["department"].apply(lambda d: "Other" if d in single_depts else d)
 department_summary = (
-    df.groupby(["department", "status"]).size().reset_index(name="count")
+    pd.DataFrame({"department": _chart_department, "status": df["status"]})
+    .groupby(["department", "status"]).size().reset_index(name="count")
     if not df.empty else pd.DataFrame(columns=["department", "status", "count"])
 )
 month_summary = (
@@ -142,8 +148,19 @@ GRAPH_CONFIG = {"displayModeBar": False}
 
 
 def bar_figure():
+    # order by total count descending, "Other" always last regardless of its
+    # count -- without this Plotly orders bars by whatever order each status's
+    # trace happens to list them in, which looks arbitrary
+    dept_order = department_summary.groupby("department")["count"].sum().sort_values(ascending=False)
+    dept_order = [d for d in dept_order.index if d != "Other"] + (["Other"] if "Other" in dept_order.index else [])
+    short_dept_order = [_short_dept(d) for d in dept_order]
+
+    # log scale: one department (Health and Social Care) holds ~87% of commitments,
+    # a linear axis would flatten every other department to an invisible sliver
     layout = {**CHART_LAYOUT_BASE, "barmode": "stack",
-              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "tickangle": -30},
+              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "tickangle": -30,
+                        "categoryorder": "array", "categoryarray": short_dept_order},
+              "yaxis": {**CHART_LAYOUT_BASE["yaxis"], "type": "log"},
               "margin": {"b": 140, "t": 10}, "legend": {"orientation": "h", "y": -0.55, "x": 0}}
     return {
         "data": [
@@ -203,14 +220,14 @@ app.layout = html.Div([
     html.Div(
         f"{total_docs} documents ingested ({hansard_n} Hansard debates + {written_n} written answers) → "
         f"{total_commitments} commitments extracted → {matched_n} have verifiable follow-up evidence so far. "
-        f"Most commitments are too recent in this session to have follow-up evidence yet — this tool reports "
+        f"Most commitments are too recent in this session to have follow-up evidence yet. This tool reports "
         f"what it can verify, not what looks good.",
         style={**CARD_STYLE, "color": TEXT, "marginBottom": "16px", "fontWeight": "bold"},
     ),
 
-    chart_card("Commitments by department and status", "department-chart", bar_figure()),
     chart_card("Commitments over time", "timeline-chart", timeline_figure()),
     chart_card("Most-tagged topics", "topic-chart", topic_figure()),
+    chart_card("Commitments by department and status", "department-chart", bar_figure()),
 
     html.H2("Drilldown", style={"color": TEXT}),
     dcc.Dropdown(
@@ -298,7 +315,7 @@ def update_search_trail(table_data, selected_rows):
         marker = "→ used as evidence" if used else "considered, not sufficient"
         rows.append(html.Div([
             html.A(c["title"] or c["url"], href=c["url"], target="_blank", style={"color": AMBER}),
-            html.Span(f"  ({c['date']}, similarity {c['similarity_score']:.2f}) — {marker}", style={"color": MUTED}),
+            html.Span(f"  ({c['date']}, similarity {c['similarity_score']:.2f}): {marker}", style={"color": MUTED}),
         ], style={"marginBottom": "4px"}))
     return rows
 
