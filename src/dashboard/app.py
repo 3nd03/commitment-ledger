@@ -148,11 +148,17 @@ GRAPH_CONFIG = {"displayModeBar": False}
 
 
 def bar_figure():
-    # order by total count descending, "Other" always last regardless of its
-    # count -- without this Plotly orders bars by whatever order each status's
-    # trace happens to list them in, which looks arbitrary
+    # order by total count descending, with the two placeholder buckets --
+    # "(unspecified)" (missing data) and "Other" (singleton departments) --
+    # always last regardless of their count, since neither is a real named
+    # department and ranking them by size looks odd next to ones that are.
+    # Without this Plotly orders bars by whatever order each status's trace
+    # happens to list them in, which looks arbitrary.
+    PLACEHOLDER_DEPTS = ["(unspecified)", "Other"]
     dept_order = department_summary.groupby("department")["count"].sum().sort_values(ascending=False)
-    dept_order = [d for d in dept_order.index if d != "Other"] + (["Other"] if "Other" in dept_order.index else [])
+    named = [d for d in dept_order.index if d not in PLACEHOLDER_DEPTS]
+    placeholders = [d for d in PLACEHOLDER_DEPTS if d in dept_order.index]
+    dept_order = named + placeholders
     short_dept_order = [_short_dept(d) for d in dept_order]
 
     # log scale: one department (Health and Social Care) holds ~87% of commitments,
