@@ -10,11 +10,18 @@ from dash import Dash, dcc, html, dash_table, Input, Output
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 from config import DB_PATH  # noqa: E402
 
-# Colors and status wording matched to the pitch deck's "The Solution" slide,
-# so the live dashboard and the deck read as one coherent product.
-STATUS_COLORS = {"fulfilled": "#22c55e", "in_progress": "#f59e0b", "no_evidence_found": "#9ca3af"}
-STATUS_DOTS = {"fulfilled": "\U0001f7e2", "in_progress": "\U0001f7e1", "no_evidence_found": "⚪"}
+# Status colors: validated colorblind-safe pair (good/warning) for the two
+# judged outcomes; no_evidence_found stays a deliberately neutral gray since
+# it's a statement about the search, not a bad outcome (see STATUS_DEFINITIONS).
+STATUS_COLORS = {"fulfilled": "#0ca30c", "in_progress": "#fab219", "no_evidence_found": "#9ca3af"}
 STATUS_LABELS = {"fulfilled": "Fulfilled", "in_progress": "In progress", "no_evidence_found": "No evidence found"}
+
+
+def status_dot(status: str) -> html.Span:
+    return html.Span(style={
+        "display": "inline-block", "width": "10px", "height": "10px", "borderRadius": "50%",
+        "backgroundColor": STATUS_COLORS[status], "marginRight": "8px",
+    })
 STATUS_DEFINITIONS = {
     "fulfilled": "The later record shows it was met. The evidence is linked.",
     "in_progress": "Movement on record: a consultation, a draft, a date, not yet delivered.",
@@ -104,57 +111,82 @@ CARD_STYLE = {
 def status_card(status: str) -> html.Div:
     return html.Div([
         html.Div([
-            html.Span(STATUS_DOTS[status], style={"marginRight": "8px"}),
+            status_dot(status),
             html.Span(STATUS_LABELS[status], style={"color": STATUS_COLORS[status], "fontWeight": "bold"}),
         ]),
-        html.Div(str(status_counts.get(status, 0)), style={"fontSize": "32px", "fontWeight": "bold", "margin": "8px 0"}),
+        html.Div(str(status_counts.get(status, 0)), style={"color": TEXT, "fontSize": "32px", "fontWeight": "bold", "margin": "8px 0"}),
         html.Div(STATUS_DEFINITIONS[status], style={"color": MUTED, "fontSize": "13px"}),
     ], style=CARD_STYLE)
 
 
+def _short_dept(name: str) -> str:
+    for prefix in ("Department for ", "Department of ", "Ministry of "):
+        if name.startswith(prefix):
+            return name[len(prefix):]
+    return name
+
+
+# Shared chrome: recessive gridlines/axes, no built-in title (each chart sits in
+# a card with its own heading instead), transparent background so the card
+# behind it shows through.
+_AXIS = {"gridcolor": BORDER, "zerolinecolor": BORDER, "linecolor": BORDER}
+CHART_LAYOUT_BASE = {
+    "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)",
+    "font": {"color": TEXT, "family": "system-ui, -apple-system, Segoe UI, sans-serif"},
+    "xaxis": dict(_AXIS), "yaxis": dict(_AXIS),
+}
+# 1px surface-color ring between stacked segments so adjacent statuses don't
+# visually bleed into one another.
+_SEGMENT_LINE = {"width": 1, "color": CARD_BG}
+GRAPH_CONFIG = {"displayModeBar": False}
+
+
 def bar_figure():
+    layout = {**CHART_LAYOUT_BASE, "barmode": "stack",
+              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "tickangle": -30},
+              "margin": {"b": 140, "t": 10}, "legend": {"orientation": "h", "y": -0.55, "x": 0}}
     return {
         "data": [
-            {"x": department_summary[department_summary.status == s]["department"],
+            {"x": [_short_dept(d) for d in department_summary[department_summary.status == s]["department"]],
              "y": department_summary[department_summary.status == s]["count"],
-             "type": "bar", "name": STATUS_LABELS[s], "marker": {"color": STATUS_COLORS[s]}}
+             "type": "bar", "name": STATUS_LABELS[s],
+             "marker": {"color": STATUS_COLORS[s], "line": _SEGMENT_LINE}}
             for s in STATUS_ORDER
         ],
-        "layout": {
-            "barmode": "stack", "title": "Commitments by department and status",
-            "paper_bgcolor": BG, "plot_bgcolor": BG, "font": {"color": TEXT},
-            "legend": {"orientation": "h"},
-        },
+        "layout": layout,
     }
 
 
 def timeline_figure():
+    layout = {**CHART_LAYOUT_BASE, "barmode": "stack", "margin": {"t": 10},
+              "legend": {"orientation": "h", "y": -0.25, "x": 0}}
     return {
         "data": [
             {"x": month_summary[month_summary.status == s]["month"],
              "y": month_summary[month_summary.status == s]["count"],
-             "type": "bar", "name": STATUS_LABELS[s], "marker": {"color": STATUS_COLORS[s]}}
+             "type": "bar", "name": STATUS_LABELS[s],
+             "marker": {"color": STATUS_COLORS[s], "line": _SEGMENT_LINE}}
             for s in STATUS_ORDER
         ],
-        "layout": {
-            "barmode": "stack", "title": "Commitments over time",
-            "paper_bgcolor": BG, "plot_bgcolor": BG, "font": {"color": TEXT},
-            "legend": {"orientation": "h"},
-        },
+        "layout": layout,
     }
 
 
 def topic_figure():
     labels, counts = zip(*top_topics) if top_topics else ([], [])
+    layout = {**CHART_LAYOUT_BASE, "margin": {"l": 160, "t": 10}, "showlegend": False}
     return {
         "data": [{"x": list(counts), "y": list(labels), "type": "bar", "orientation": "h",
-                   "marker": {"color": AMBER}}],
-        "layout": {
-            "title": "Most-tagged topics",
-            "paper_bgcolor": BG, "plot_bgcolor": BG, "font": {"color": TEXT},
-            "margin": {"l": 160},
-        },
+                   "marker": {"color": STATUS_COLORS["in_progress"], "line": _SEGMENT_LINE}}],
+        "layout": layout,
     }
+
+
+def chart_card(title: str, graph_id: str, figure: dict) -> html.Div:
+    return html.Div([
+        html.H3(title, style={"color": TEXT, "fontSize": "16px", "marginTop": 0}),
+        dcc.Graph(id=graph_id, figure=figure, config=GRAPH_CONFIG),
+    ], style={**CARD_STYLE, "marginBottom": "16px"})
 
 
 app.layout = html.Div([
@@ -173,19 +205,35 @@ app.layout = html.Div([
         f"{total_commitments} commitments extracted → {matched_n} have verifiable follow-up evidence so far. "
         f"Most commitments are too recent in this session to have follow-up evidence yet — this tool reports "
         f"what it can verify, not what looks good.",
-        style={**CARD_STYLE, "marginBottom": "16px", "fontWeight": "bold"},
+        style={**CARD_STYLE, "color": TEXT, "marginBottom": "16px", "fontWeight": "bold"},
     ),
 
-    dcc.Graph(id="department-chart", figure=bar_figure()),
-    dcc.Graph(id="timeline-chart", figure=timeline_figure()),
-    dcc.Graph(id="topic-chart", figure=topic_figure()),
+    chart_card("Commitments by department and status", "department-chart", bar_figure()),
+    chart_card("Commitments over time", "timeline-chart", timeline_figure()),
+    chart_card("Most-tagged topics", "topic-chart", topic_figure()),
 
     html.H2("Drilldown", style={"color": TEXT}),
     dcc.Dropdown(
         id="department-filter",
+        className="dash-dropdown",
         options=[{"label": d, "value": d} for d in sorted(df["department"].unique())] if not df.empty else [],
         placeholder="Select a department",
+        style={"marginBottom": "12px"},
     ),
+    html.Div([
+        html.Span(
+            "Select ⚪ next to a commitment to view its search trail below.",
+            style={"color": MUTED, "fontSize": "13px"},
+        ),
+        html.Button(
+            "Clear selection", id="clear-selection-btn", n_clicks=0,
+            style={
+                "marginLeft": "12px", "fontSize": "12px", "background": "transparent",
+                "color": STATUS_COLORS["in_progress"], "border": f"1px solid {BORDER}",
+                "borderRadius": "4px", "padding": "2px 8px", "cursor": "pointer",
+            },
+        ),
+    ], style={"marginBottom": "4px"}),
     dash_table.DataTable(
         id="commitment-table",
         columns=[
@@ -211,41 +259,23 @@ app.layout = html.Div([
         style={"color": MUTED},
     ),
     html.Div(id="search-trail-panel", style={**CARD_STYLE}),
-
-    html.Hr(style={"borderColor": BORDER, "margin": "32px 0"}),
-
-    html.Div([
-        html.Div("⚠ ILLUSTRATIVE EXAMPLE — NOT REAL DATA", style={"color": AMBER, "fontWeight": "bold", "marginBottom": "8px"}),
-        html.P(
-            "The example below is a fictional mockup, not a real commitment or minister. It shows what this "
-            "ledger looks like once a commitment has had enough time to accumulate real follow-up evidence — "
-            "most of today's real dataset is too recent in the session for that to have happened yet.",
-            style={"color": MUTED, "fontSize": "13px"},
-        ),
-        html.Div([
-            html.Div([
-                html.Span(STATUS_DOTS["fulfilled"], style={"marginRight": "8px"}),
-                html.Span("Fulfilled", style={"color": STATUS_COLORS["fulfilled"], "fontWeight": "bold"}),
-            ]),
-            html.P(
-                "“We will publish a review of NHS dental access by March 2027.” "
-                "— [Illustrative] Minister for Example Affairs, [Illustrative] Department of Example, 2026-06-01",
-                style={"fontStyle": "italic", "marginTop": "8px"},
-            ),
-            html.P(
-                "Evidence (illustrative, not a real quote): “The review was published on 2027-03-14, "
-                "confirming revised access targets for NHS dental services.”",
-                style={"color": MUTED},
-            ),
-        ], style={"background": BG, "border": f"1px dashed {AMBER}", "borderRadius": "6px", "padding": "12px", "marginTop": "8px"}),
-    ], style={**CARD_STYLE, "border": f"1px dashed {AMBER}"}),
-], style={"background": BG, "padding": "24px", "fontFamily": "sans-serif"})
+], style={"background": BG, "padding": "24px", "maxWidth": "1200px", "margin": "0 auto",
+          "fontFamily": "system-ui, -apple-system, 'Segoe UI', sans-serif"})
 
 
 @app.callback(Output("commitment-table", "data"), Input("department-filter", "value"))
 def update_table(department):
     filtered = df if not department else df[df.department == department]
     return filtered.to_dict("records")
+
+
+@app.callback(
+    Output("commitment-table", "selected_rows"),
+    Input("clear-selection-btn", "n_clicks"),
+    prevent_initial_call=True,
+)
+def clear_selection(_n_clicks):
+    return []
 
 
 @app.callback(

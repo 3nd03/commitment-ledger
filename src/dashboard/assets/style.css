@@ -1,0 +1,35 @@
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Dark-theme the Dropdown filter (Dash 4.x dash-dropdown-* internals) */
+.dash-dropdown-trigger,
+.dash-dropdown-content,
+.dash-dropdown-search {
+    background-color: #1a1f2e !important;
+    border-color: #2a3141 !important;
+    color: #e5e7eb !important;
+}
+.dash-dropdown-value,
+.dash-dropdown-placeholder,
+.dash-dropdown-search input {
+    color: #e5e7eb !important;
+}
+.dash-dropdown-option {
+    background-color: #1a1f2e !important;
+    color: #e5e7eb !important;
+}
+.dash-dropdown-option:hover,
+.dash-dropdown-option[aria-selected="true"] {
+    background-color: #2a3141 !important;
+}
+.dash-dropdown-trigger-icon,
+.dash-dropdown-search-icon,
+.dash-dropdown-clear {
+    filter: invert(1) grayscale(1) brightness(1.6);
+}
+
+/* Table row-select radio buttons: keep visible against the dark card background */
+.dash-table-container input[type="radio"] {
+    accent-color: #fab219;
+}
