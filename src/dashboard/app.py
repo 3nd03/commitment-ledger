@@ -148,31 +148,31 @@ GRAPH_CONFIG = {"displayModeBar": False}
 
 
 def bar_figure():
-    # order by total count descending, with the two placeholder buckets --
-    # "(unspecified)" (missing data) and "Other" (singleton departments) --
-    # always last regardless of their count, since neither is a real named
-    # department and ranking them by size looks odd next to ones that are.
-    # Without this Plotly orders bars by whatever order each status's trace
-    # happens to list them in, which looks arbitrary.
+    # horizontal, like the topic chart -- no rotated labels to clean up, and
+    # full department names actually fit down the side. Placeholder buckets
+    # ("(unspecified)" = missing data, "Other" = singleton departments) go at
+    # the bottom regardless of count, since neither is a real named department;
+    # real departments are ascending above them so the biggest sits at the top
+    # (Plotly renders a category array bottom-to-top).
     PLACEHOLDER_DEPTS = ["(unspecified)", "Other"]
-    dept_order = department_summary.groupby("department")["count"].sum().sort_values(ascending=False)
-    named = [d for d in dept_order.index if d not in PLACEHOLDER_DEPTS]
-    placeholders = [d for d in PLACEHOLDER_DEPTS if d in dept_order.index]
-    dept_order = named + placeholders
+    dept_totals = department_summary.groupby("department")["count"].sum().sort_values(ascending=False)
+    named_desc = [d for d in dept_totals.index if d not in PLACEHOLDER_DEPTS]
+    placeholders = [d for d in PLACEHOLDER_DEPTS if d in dept_totals.index]
+    dept_order = placeholders + list(reversed(named_desc))
     short_dept_order = [_short_dept(d) for d in dept_order]
 
     # log scale: one department (Health and Social Care) holds ~87% of commitments,
     # a linear axis would flatten every other department to an invisible sliver
     layout = {**CHART_LAYOUT_BASE, "barmode": "stack",
-              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "tickangle": -30,
+              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "type": "log"},
+              "yaxis": {**CHART_LAYOUT_BASE["yaxis"],
                         "categoryorder": "array", "categoryarray": short_dept_order},
-              "yaxis": {**CHART_LAYOUT_BASE["yaxis"], "type": "log"},
-              "margin": {"b": 140, "t": 10}, "legend": {"orientation": "h", "y": -0.55, "x": 0}}
+              "margin": {"l": 200, "t": 10}, "legend": {"orientation": "h", "y": -0.2, "x": 0}}
     return {
         "data": [
-            {"x": [_short_dept(d) for d in department_summary[department_summary.status == s]["department"]],
-             "y": department_summary[department_summary.status == s]["count"],
-             "type": "bar", "name": STATUS_LABELS[s],
+            {"y": [_short_dept(d) for d in department_summary[department_summary.status == s]["department"]],
+             "x": department_summary[department_summary.status == s]["count"],
+             "type": "bar", "orientation": "h", "name": STATUS_LABELS[s],
              "marker": {"color": STATUS_COLORS[s], "line": _SEGMENT_LINE}}
             for s in STATUS_ORDER
         ],
@@ -239,8 +239,10 @@ app.layout = html.Div([
     dcc.Dropdown(
         id="department-filter",
         className="dash-dropdown",
-        options=[{"label": d, "value": d} for d in sorted(df["department"].unique())] if not df.empty else [],
-        placeholder="Select a department",
+        options=[{"label": "All departments", "value": ""}] +
+                ([{"label": d, "value": d} for d in sorted(df["department"].unique())] if not df.empty else []),
+        value="",
+        clearable=False,
         style={"marginBottom": "12px"},
     ),
     html.Div([
@@ -270,6 +272,7 @@ app.layout = html.Div([
         ],
         markdown_options={"link_target": "_blank"},
         row_selectable="single",
+        cell_selectable=False,
         page_size=10,
         style_cell={"textAlign": "left", "whiteSpace": "normal", "backgroundColor": CARD_BG, "color": TEXT},
         style_header={"backgroundColor": BORDER, "color": TEXT, "fontWeight": "bold"},
@@ -315,7 +318,7 @@ def update_search_trail(table_data, selected_rows):
     if candidates.empty:
         return html.Span("No candidate documents (nothing dated after this commitment).", style={"color": MUTED})
 
-    rows = [html.P(f"Search trail for: “{row['commitment_text']}”", style={"fontWeight": "bold"})]
+    rows = [html.P(f"Search trail for: “{row['commitment_text']}”", style={"color": TEXT, "fontWeight": "bold"})]
     for _, c in candidates.iterrows():
         used = row["status"] != "no_evidence_found" and c["url"] == row.get("evidence_url")
         marker = "→ used as evidence" if used else "considered, not sufficient"

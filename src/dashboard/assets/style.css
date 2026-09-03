@@ -33,3 +33,48 @@ body {
 .dash-table-container input[type="radio"] {
     accent-color: #fab219;
 }
+
+/* Markdown-rendered links (Source/Evidence columns): default blue/purple is
+   nearly invisible on the dark navy card background */
+.dash-table-container a,
+.dash-table-container a:visited {
+    color: #fab219 !important;
+}
+
+/* Pagination controls: default browser styling is black-on-transparent,
+   invisible on the dark theme, with mismatched box sizes for the arrows
+   vs. the page-number input */
+.dash-table-container .previous-next-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.dash-table-container .previous-page,
+.dash-table-container .next-page,
+.dash-table-container .first-page,
+.dash-table-container .last-page {
+    color: #e5e7eb !important;
+    background-color: #1a1f2e !important;
+    border: 1px solid #2a3141 !important;
+    border-radius: 4px;
+    min-width: 32px;
+    height: 28px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+.dash-table-container .current-page-container,
+.dash-table-container .page-number {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #e5e7eb !important;
+}
+.dash-table-container .current-page {
+    color: #e5e7eb !important;
+    background-color: #1a1f2e !important;
+    border: 1px solid #2a3141 !important;
+    border-radius: 4px;
+    height: 28px;
+    box-sizing: border-box;
+    text-align: center;
+}
