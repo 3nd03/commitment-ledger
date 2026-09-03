@@ -3,10 +3,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# TODO: fill in once policy area and session are confirmed, see docs/OPEN_QUESTIONS.md
-POLICY_AREA = None  # e.g. "health"
-SESSION_START = None  # e.g. "2024-07-17"
-SESSION_END = None
+# Locked 2026-09-02: NHS/health (team consensus, doc volume checked live), current
+# session only (started 13 May 2026, no prorogation yet as of this date). Bump
+# SESSION_END closer to the hackathon date to pick up newer written answers.
+POLICY_AREA = "NHS"
+SESSION_START = "2026-05-13"
+SESSION_END = "2026-09-02"
 
 DB_PATH = os.getenv("DB_PATH", "data/ledger.db")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "anthropic")

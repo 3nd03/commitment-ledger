@@ -29,3 +29,15 @@ CREATE TABLE IF NOT EXISTS follow_ups (
     similarity_score REAL,
     checked_at TEXT NOT NULL
 );
+
+-- search trail: the candidate documents actually considered for each commitment,
+-- independent of the final follow_ups verdict. Lets the dashboard show *what was
+-- searched and rejected*, not just the outcome. Embedding-only (no LLM judge), so
+-- it's cheap to (re)build without re-spending on matching.
+CREATE TABLE IF NOT EXISTS search_candidates (
+    id TEXT PRIMARY KEY,
+    commitment_id TEXT NOT NULL REFERENCES commitments(id),
+    document_id TEXT NOT NULL REFERENCES documents(id),
+    rank INTEGER NOT NULL,
+    similarity_score REAL NOT NULL
+);
