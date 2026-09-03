@@ -11,14 +11,12 @@ import openai
 from openai import OpenAI
 from tqdm import tqdm
 
-from config import DB_PATH, OPENAI_API_KEY, EMBEDDING_MODEL
+from config import DB_PATH, OPENAI_API_KEY, ANTHROPIC_API_KEY, EMBEDDING_MODEL
 
 import anthropic
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
-# bare client: resolves credentials via `ant auth login` OAuth profile
-# (draws on claude.ai subscription credit, not a Console API-key balance)
-claude_client = anthropic.Anthropic()
+claude_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 TOP_K = 5
 COMMIT_EVERY = 10  # persist progress periodically so a crash mid-run doesn't lose everything

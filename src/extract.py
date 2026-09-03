@@ -7,13 +7,11 @@ import uuid
 from pydantic import BaseModel
 from tqdm import tqdm
 
-from config import DB_PATH
+from config import DB_PATH, ANTHROPIC_API_KEY
 
 import anthropic
 
-# bare client: resolves credentials via `ant auth login` OAuth profile
-# (draws on claude.ai subscription credit, not a Console API-key balance)
-client = anthropic.Anthropic()
+client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 COMMIT_EVERY = 20  # persist progress periodically so a crash mid-run doesn't lose everything
 MAX_RETRIES = 3
