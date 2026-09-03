@@ -41,18 +41,29 @@ body {
     color: #fab219 !important;
 }
 
-/* Pagination controls: default browser styling is black-on-transparent,
-   invisible on the dark theme, with mismatched box sizes for the arrows
-   vs. the page-number input */
+/* Pagination controls. Dash's own DOM (from dash_table's async-table.js):
+     .previous-next-container
+       > button.first-page / button.previous-page
+       > div.page-number
+           > div.current-page-container > input.current-page (+ a hidden
+             .current-page-shadow behind it, used only to auto-size the box)
+           > div.last-page   <-- NOT a button: this is the "/ N" total-pages
+                                  text. It reuses the class name "last-page",
+                                  which also names the real jump-to-last-page
+                                  BUTTON outside .page-number -- the two must
+                                  be styled separately or they end up mismatched.
+       > button.next-page / button.last-page
+   Default styling is black text with no background, invisible on the dark
+   theme, and the input needs !important to beat the built-in `color: black`. */
 .dash-table-container .previous-next-container {
     display: flex;
     align-items: center;
     gap: 6px;
 }
-.dash-table-container .previous-page,
-.dash-table-container .next-page,
-.dash-table-container .first-page,
-.dash-table-container .last-page {
+.dash-table-container .previous-next-container > button.first-page,
+.dash-table-container .previous-next-container > button.previous-page,
+.dash-table-container .previous-next-container > button.next-page,
+.dash-table-container .previous-next-container > button.last-page {
     color: #e5e7eb !important;
     background-color: #1a1f2e !important;
     border: 1px solid #2a3141 !important;
@@ -62,19 +73,40 @@ body {
     box-sizing: border-box;
     cursor: pointer;
 }
-.dash-table-container .current-page-container,
 .dash-table-container .page-number {
-    display: flex;
+    display: flex !important;
     align-items: center;
     gap: 4px;
+}
+.dash-table-container .page-number .current-page-container {
+    height: 28px;
+}
+.dash-table-container .page-number .current-page-container input.current-page,
+.dash-table-container .page-number .current-page-container .current-page-shadow {
+    color: #e5e7eb !important;
+    background-color: #1a1f2e !important;
+    border: 1px solid #2a3141 !important;
+    border-radius: 4px !important;
+    box-sizing: border-box;
+    height: 28px !important;
+    min-width: 32px;
+    text-align: center;
+}
+.dash-table-container .page-number .current-page-container input.current-page::placeholder,
+.dash-table-container .page-number .current-page-container .current-page-shadow::placeholder {
     color: #e5e7eb !important;
 }
-.dash-table-container .current-page {
+/* the "/ N" total-pages text -- same box treatment as the input, so the two
+   read as one matched pair instead of differently sized elements */
+.dash-table-container .page-number > div.last-page {
     color: #e5e7eb !important;
     background-color: #1a1f2e !important;
     border: 1px solid #2a3141 !important;
     border-radius: 4px;
     height: 28px;
+    min-width: 32px;
     box-sizing: border-box;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

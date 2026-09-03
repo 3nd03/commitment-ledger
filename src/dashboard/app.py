@@ -164,7 +164,10 @@ def bar_figure():
     # log scale: one department (Health and Social Care) holds ~87% of commitments,
     # a linear axis would flatten every other department to an invisible sliver
     layout = {**CHART_LAYOUT_BASE, "barmode": "stack",
-              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "type": "log"},
+              # dtick=1 on a log axis means "one tick per power of ten" (1, 10, 100),
+              # without it Plotly also labels every intermediate digit (2,3,4...9
+              # within each decade), which is what made the axis look cluttered
+              "xaxis": {**CHART_LAYOUT_BASE["xaxis"], "type": "log", "dtick": 1},
               "yaxis": {**CHART_LAYOUT_BASE["yaxis"],
                         "categoryorder": "array", "categoryarray": short_dept_order},
               "margin": {"l": 200, "t": 10}, "legend": {"orientation": "h", "y": -0.2, "x": 0}}
