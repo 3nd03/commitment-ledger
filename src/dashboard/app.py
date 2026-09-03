@@ -327,4 +327,4 @@ def update_search_trail(table_data, selected_rows):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
