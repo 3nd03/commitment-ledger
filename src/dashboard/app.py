@@ -225,7 +225,7 @@ app.layout = html.Div([
     # Status summary cards (mirrors the deck's "The Solution" slide)
     html.Div(
         f"{total_commitments} commitments, by status",
-        style={"color": MUTED, "fontSize": "13px", "marginBottom": "6px"},
+        style={"color": TEXT, "fontSize": "15px", "fontWeight": "bold", "marginBottom": "8px"},
     ),
     html.Div([status_card(s) for s in STATUS_ORDER], style={"display": "flex", "gap": "12px", "marginBottom": "16px"}),
 
