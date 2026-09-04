@@ -23,9 +23,9 @@ def status_dot(status: str) -> html.Span:
         "backgroundColor": STATUS_COLORS[status], "marginRight": "8px",
     })
 STATUS_DEFINITIONS = {
-    "fulfilled": "The later record shows it was met. The evidence is linked.",
-    "in_progress": "Movement on record: a consultation, a draft, a date, not yet delivered.",
-    "no_evidence_found": "We searched and found nothing. A statement about our search, not the minister.",
+    "fulfilled": "Evidence found.",
+    "in_progress": "Movement recorded; not yet delivered.",
+    "no_evidence_found": "No follow-up on statement yet.",
 }
 STATUS_ORDER = ["fulfilled", "in_progress", "no_evidence_found"]
 
@@ -223,16 +223,23 @@ app.layout = html.Div([
     ),
 
     # Status summary cards (mirrors the deck's "The Solution" slide)
+    html.Div(
+        f"{total_commitments} commitments, by status",
+        style={"color": MUTED, "fontSize": "13px", "marginBottom": "6px"},
+    ),
     html.Div([status_card(s) for s in STATUS_ORDER], style={"display": "flex", "gap": "12px", "marginBottom": "16px"}),
 
     # Honest framing callout
-    html.Div(
-        f"{total_docs} documents ingested ({hansard_n} Hansard debates + {written_n} written answers) → "
-        f"{total_commitments} commitments extracted → {matched_n} have verifiable follow-up evidence so far. "
-        f"Most commitments are too recent in this session to have follow-up evidence yet. This tool reports "
-        f"what it can verify, not what looks good.",
-        style={**CARD_STYLE, "color": TEXT, "marginBottom": "16px", "fontWeight": "bold"},
-    ),
+    html.Div([
+        html.Div(
+            f"{total_docs} documents → {total_commitments} commitments → {matched_n} verified",
+            style={"color": TEXT, "fontWeight": "bold"},
+        ),
+        html.Div(
+            "Most too recent to resolve yet. We report what we can verify, not what looks good.",
+            style={"color": MUTED, "fontSize": "13px", "marginTop": "4px"},
+        ),
+    ], style={**CARD_STYLE, "marginBottom": "16px"}),
 
     chart_card("Commitments over time", "timeline-chart", timeline_figure()),
     chart_card("Most-tagged topics", "topic-chart", topic_figure()),
